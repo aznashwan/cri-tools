@@ -28,6 +28,10 @@ import (
 	runtimeapi "k8s.io/cri-api/pkg/apis/runtime/v1"
 )
 
+const (
+	defaultContainerBenchmarkTimeoutSeconds = 60
+)
+
 var _ = framework.KubeDescribe("Container", func() {
 	f := framework.NewDefaultCRIFramework()
 
@@ -41,6 +45,11 @@ var _ = framework.KubeDescribe("Container", func() {
 
 	Context("benchmark about operations on Container", func() {
 		It("benchmark about basic operations on Container", func() {
+			timeout := defaultContainerBenchmarkTimeoutSeconds
+			if framework.TestContext.BenchmarkingParams.ContainerBenchmarkTimeoutSeconds > 0 {
+				timeout = framework.TestContext.BenchmarkingParams.ContainerBenchmarkTimeoutSeconds
+			}
+
 			// Setup sampling config from TestContext:
 			samplingConfig := gmeasure.SamplingConfig{
 				N:           framework.TestContext.BenchmarkingParams.ContainersNumber,
@@ -61,7 +70,7 @@ var _ = framework.KubeDescribe("Container", func() {
 			}
 			resultsManager := NewLifecycleBenchmarksResultsManager(
 				resultsSet,
-				60,
+				timeout,
 			)
 			resultsChannel := resultsManager.StartResultsConsumer()
 
