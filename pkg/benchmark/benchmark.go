@@ -56,5 +56,6 @@ func TestPerformance(t *testing.T) {
 			reporterConfig.JUnitReport = path.Join(reportDir, junitFile)
 		}
 	}
+	fmt.Printf("### JUnit outfile (benchmark): %s", reporterConfig.JUnitReport)
 	RunSpecs(t, "Benchmark Test Suite", runSpecsArgs...)
 }

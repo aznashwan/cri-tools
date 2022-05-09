@@ -57,5 +57,6 @@ func TestE2ECRI(t *testing.T) {
 			reporterConfig.JUnitReport = path.Join(reportDir, junitFile)
 		}
 	}
+	fmt.Printf("### JUnit outfile (e2e): %s", reporterConfig.JUnitReport)
 	RunSpecs(t, "E2ECRI Suite", runSpecsArgs...)
 }
