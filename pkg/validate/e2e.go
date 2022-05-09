@@ -27,7 +27,6 @@ import (
 	"github.com/golang/glog"
 	"github.com/kubernetes-sigs/cri-tools/pkg/framework"
 	"github.com/onsi/ginkgo/v2"
-	"github.com/onsi/ginkgo/v2/reporters"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -41,19 +40,22 @@ import (
 func TestE2ECRI(t *testing.T) {
 	rand.Seed(time.Now().UTC().UnixNano())
 	RegisterFailHandler(Fail)
-	r := []Reporter{}
+
+	suiteConfig, reporterConfig := ginkgo.GinkgoConfiguration()
+	reporterConfig.FullTrace = true
+	runSpecsArgs := []interface{}{&suiteConfig, &reporterConfig}
+
+	// Optionally configure reporting to a file if a report dir has been configured:
 	reportDir := framework.TestContext.ReportDir
 	if reportDir != "" {
 		// Create the directory if it doesn't already exists
 		if err := os.MkdirAll(reportDir, 0755); err != nil {
 			glog.Errorf("Failed creating report directory: %v", err)
 		} else {
-			suite, _ := ginkgo.GinkgoConfiguration()
 			// Configure a junit reporter to write to the directory
-			junitFile := fmt.Sprintf("junit_%s%02d.xml", framework.TestContext.ReportPrefix, suite.ParallelProcess)
-			junitPath := path.Join(reportDir, junitFile)
-			r = append(r, reporters.NewJUnitReporter(junitPath))
+			junitFile := fmt.Sprintf("junit_%s%02d.xml", framework.TestContext.ReportPrefix, suiteConfig.ParallelProcess)
+			reporterConfig.JUnitReport = path.Join(reportDir, junitFile)
 		}
 	}
-	RunSpecsWithDefaultAndCustomReporters(t, "E2ECRI Suite", r)
+	RunSpecs(t, "E2ECRI Suite", runSpecsArgs...)
 }
